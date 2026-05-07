@@ -1,0 +1,30 @@
+# Local-only sandbox (developer scratch, not for distribution)
+local/
+
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.eggs/
+build/
+dist/
+.venv/
+.python-version
+
+# Caches
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+
+# Editor
+.vscode/
+.idea/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Generated outputs from running examples
+examples/output/
+*.png
+!docs/**/*.png
