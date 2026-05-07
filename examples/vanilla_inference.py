@@ -15,7 +15,7 @@ PROMPT = "A bat is sitting on a branch while an owl is flying above through the 
 SEED = 200
 NUM_INFERENCE_STEPS = 20
 GUIDANCE_SCALE = 3.5
-HEIGHT = WIDTH = 1024
+HEIGHT = WIDTH = 512
 
 
 def main() -> None:

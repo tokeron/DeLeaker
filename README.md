@@ -12,9 +12,40 @@ cd DeLeaker
 pip install -e .
 ```
 
-Tested with `torch==2.6 (cu118)`, `diffusers==0.32`, `transformers==4.49`, Python 3.10. CUDA GPU with ≥24 GB VRAM recommended for FLUX.1-dev.
+**FLUX.1-dev is a gated model.** Before the first run you must:
+
+1. Create a Hugging Face account and accept the license at https://huggingface.co/black-forest-labs/FLUX.1-dev.
+2. Authenticate locally:
+   ```bash
+   huggingface-cli login
+   ```
+
+For the comparison-grid example that pulls prompts from `tokeron/slim-dataset`:
+
+```bash
+pip install datasets
+```
+
+Tested with Python 3.10, `torch==2.6` (cu118), `diffusers==0.32`, `transformers==4.49`. VRAM use scales with resolution: ~16 GB at 512×512, ~24 GB at 1024×1024 with FLUX.1-dev in fp16.
+
+### Smoke test
+
+After install + login, verify the pipeline loads and generates:
+
+```bash
+python quickstart.py
+```
+
+This writes `out.png` (a single 512×512 image, ~1 min on a modern GPU after the model downloads on the first run).
 
 ## Quick start
+
+A self-contained one-prompt example lives at the repo root in two formats:
+
+- [`quickstart.py`](quickstart.py) — `python quickstart.py`
+- [`quickstart.ipynb`](quickstart.ipynb) — open in Jupyter / VS Code
+
+Or do it inline:
 
 ```python
 import torch
@@ -25,10 +56,11 @@ pipe = DeleakerFluxPipeline.from_pretrained(
 ).to("cuda")
 
 image = pipe(
-    prompt="A cat and a cheetah are splashing each other with water in a shallow river.",
-    entities=["cat", "cheetah"],
+    prompt="A bat and an owl are perched side by side on a tree branch.",
+    entities=["bat", "owl"],
     num_inference_steps=20, guidance_scale=3.5,
-    generator=torch.Generator("cuda").manual_seed(300),
+    height=512, width=512,
+    generator=torch.Generator("cuda").manual_seed(200),
 ).images[0]
 image.save("out.png")
 ```
@@ -48,14 +80,14 @@ The `entities` you pass must appear verbatim in the prompt. Pass a `DeleakerConf
 **Dataset mode (default).** Use prompts that the published `tokeron/slim-dataset` already labelled as leaking on FLUX.1-dev. The script pulls every seed listed for each selected prompt and produces a 2-panel grid per (prompt, seed): `vanilla | deleaker`. The HF reference image is still saved alongside (`seed_XXXX_reference.png`) for spot-checks.
 
 ```bash
-# Run on the default selection of dataset prompts (indices 2, 3, 4):
+# Run on the default selection of dataset prompts (indices 1, 3, 4):
 python examples/generate_and_compare.py
 
 # Pick your own prompt indices (0-based, in order of first appearance):
 python examples/generate_and_compare.py --hf-indices 5,6,8
 ```
 
-Resolution is **fixed at 512×512** in dataset mode because the references on the Hub were generated at that resolution; running at a different size would produce wholly different compositions for the same seed.
+Stick with the default 512×512 in dataset mode — the references on the Hub were generated at that resolution, and running at a different size would produce wholly different compositions for the same seed.
 
 **Custom mode.** Provide your own prompt and entities. The script generates vanilla + deleaker for each seed and produces the same 2-panel `vanilla | deleaker` grid.
 
@@ -63,11 +95,10 @@ Resolution is **fixed at 512×512** in dataset mode because the references on th
 python examples/generate_and_compare.py \
     --prompt "A bat and an owl are perched side by side on a tree branch." \
     --entities "bat,owl" \
-    --seeds 100,200,300 \
-    --height 1024 --width 1024
+    --seeds 100,200,300
 ```
 
-Each entity passed via `--entities` must appear verbatim in the prompt. Default seeds are `100,200,300`; default resolution is 512×512.
+Each entity passed via `--entities` must appear verbatim in the prompt. Default seeds are `100,200,300`; default resolution is 512×512. Add `--height 1024 --width 1024` to render at 1024 (slower, more VRAM, generally better-looking).
 
 **Output layout** (both modes):
 ```
