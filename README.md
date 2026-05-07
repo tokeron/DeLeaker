@@ -2,9 +2,11 @@
 
 Official implementation of **["DeLeaker: Dynamic Inference-Time Reweighting For Semantic Leakage Mitigation in Text-to-Image Models"](https://arxiv.org/abs/2510.15015)** (ICLR 2026). 📄 [Paper](https://arxiv.org/abs/2510.15015) · 🌐 [Project page](https://venturamor.github.io/DeLeaker/) · 🤗 [Dataset](https://huggingface.co/datasets/tokeron/slim-dataset)
 
-Reduce semantic leakage between entities in [FLUX.1](https://github.com/black-forest-labs/flux) text-to-image generation by rewriting attention at inference time. No training, no fine-tuning — just patch the attention processor.
+## Abstract
 
-> **Leakage** is when features bleed across entities — e.g. a prompt for *a cat and a cheetah* produces a "cheet-cat" with cheetah spots on a cat body. DeLeaker uses the model's own attention to localize each entity and then suppresses cross-entity image-image and image-text attention while it denoises.
+> Text-to-Image (T2I) models have advanced rapidly, yet they remain vulnerable to *semantic leakage*, the unintended transfer of semantically related features between distinct entities. Existing mitigation strategies are often optimization-based or dependent on external inputs. We introduce **DeLeaker**, a lightweight, optimization-free inference-time approach that mitigates leakage by directly intervening on the model's attention maps. Throughout the diffusion process, DeLeaker dynamically reweights attention maps to suppress excessive cross-entity interactions while strengthening the identity of each entity. To support systematic evaluation, we introduce **SLIM** (Semantic Leakage in IMages), the first dataset dedicated to semantic leakage, comprising 1,130 human-verified samples spanning diverse scenarios, together with a novel automatic evaluation framework. Experiments demonstrate that DeLeaker consistently outperforms all baselines, even when they are provided with external information, achieving effective leakage mitigation without compromising fidelity or quality. These results underscore the value of attention control and pave the way for more semantically precise T2I models.
+
+> **Leakage example.** A prompt for *a cat and a cheetah* tends to produce a "cheet-cat" — cheetah spots bleeding onto the cat. DeLeaker uses the model's own attention to localize each entity, then suppresses cross-entity image–image and image–text attention while it denoises.
 
 ## Install
 
