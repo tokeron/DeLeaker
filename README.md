@@ -1,5 +1,7 @@
 # DeLeaker
 
+Official implementation of **["DeLeaker: Dynamic Inference-Time Reweighting For Semantic Leakage Mitigation in Text-to-Image Models"](https://arxiv.org/abs/2510.15015)** (ICLR 2026). 📄 [Paper](https://arxiv.org/abs/2510.15015) · 🌐 [Project page](https://venturamor.github.io/DeLeaker/) · 🤗 [Dataset](https://huggingface.co/datasets/tokeron/slim-dataset)
+
 Reduce semantic leakage between entities in [FLUX.1](https://github.com/black-forest-labs/flux) text-to-image generation by rewriting attention at inference time. No training, no fine-tuning — just patch the attention processor.
 
 > **Leakage** is when features bleed across entities — e.g. a prompt for *a cat and a cheetah* produces a "cheet-cat" with cheetah spots on a cat body. DeLeaker uses the model's own attention to localize each entity and then suppresses cross-entity image-image and image-text attention while it denoises.
@@ -181,4 +183,12 @@ The window indices are absolute *block-step* values: `step_index * 57 + block_of
 
 ## Citation
 
-If this is useful, please cite the paper (preprint pending) and link this repo.
+```bibtex
+@inproceedings{ventura2026deleaker,
+  title     = {DeLeaker: Dynamic Inference-Time Reweighting For Semantic Leakage Mitigation in Text-to-Image Models},
+  author    = {Ventura, Mor and Toker, Michael and Patashnik, Or and Belinkov, Yonatan and Reichart, Roi},
+  booktitle = {International Conference on Learning Representations (ICLR)},
+  year      = {2026},
+  url       = {https://arxiv.org/abs/2510.15015}
+}
+```
