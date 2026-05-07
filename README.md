@@ -10,9 +10,16 @@ Official implementation of **["DeLeaker: Dynamic Inference-Time Reweighting For 
 
 ## Install
 
+Python 3.10, CUDA 11.8 GPU. **Install Torch with matching CUDA libs first** — the default PyPI wheel ships an incompatible CUDA bundle that breaks at import on many systems:
+
 ```bash
 git clone git@github.com:tokeron/DeLeaker.git
 cd DeLeaker
+
+# 1. Torch + CUDA 11.8 (skip if you already have a working torch install):
+pip install --index-url https://download.pytorch.org/whl/cu118 torch==2.6.0
+
+# 2. The package + the rest of its deps:
 pip install -e .
 ```
 
@@ -30,7 +37,7 @@ For the comparison-grid example that pulls prompts from `tokeron/slim-dataset`:
 pip install datasets
 ```
 
-Tested with Python 3.10, `torch==2.6` (cu118), `diffusers==0.32`, `transformers==4.49`. VRAM use scales with resolution: ~16 GB at 512×512, ~24 GB at 1024×1024 with FLUX.1-dev in fp16.
+Tested with Python 3.10, `torch==2.6` (cu118), `diffusers==0.32`, `transformers==4.49`. The pinned ranges in `requirements.txt` keep `transformers` below 5.0 and `diffusers` below 0.34 — both have introduced breaking changes to the Flux pipeline / attention processor API outside that window. VRAM use scales with resolution: ~16 GB at 512×512, ~24 GB at 1024×1024 with FLUX.1-dev in fp16.
 
 ### Smoke test
 

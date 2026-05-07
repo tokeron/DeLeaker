@@ -1,11 +1,18 @@
-torch>=2.0
-diffusers>=0.30
-transformers>=4.45
-accelerate>=0.30
-huggingface_hub>=0.26
-safetensors>=0.4.1
+# Tested combination (Python 3.10 + CUDA 11.8). Looser bounds are fine but
+# diffusers/transformers occasionally break the FluxPipeline API across
+# minor versions, so the upper bounds here are deliberate.
+#
+# Torch wheels with CUDA 11.8 are not on PyPI by default — install from the
+# PyTorch index first to get matching cuda libs, then `pip install -e .`:
+#     pip install --index-url https://download.pytorch.org/whl/cu118 torch==2.6.0
+torch>=2.4,<2.8
+diffusers>=0.30,<0.34
+transformers>=4.45,<5.0
+accelerate>=0.30,<2.0
+huggingface_hub>=0.26,<1.0
+safetensors>=0.4.1,<0.6
 sentencepiece
 protobuf
 pillow
-numpy
+numpy<2.5
 opencv-python-headless
