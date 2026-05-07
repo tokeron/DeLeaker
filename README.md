@@ -8,6 +8,12 @@ Official implementation of **["DeLeaker: Dynamic Inference-Time Reweighting For 
 
 > **Leakage example.** A prompt for *a cat and a cheetah* tends to produce a "cheet-cat" — cheetah spots bleeding onto the cat. DeLeaker uses the model's own attention to localize each entity, then suppresses cross-entity image–image and image–text attention while it denoises.
 
+## Method
+
+![DeLeaker method overview](docs/method.png)
+
+At every diffusion step DeLeaker (a) builds per-entity attention masks from the model's own image–text attention, (b) suppresses cross-entity attention so features stop bleeding across entities, and (c) strengthens self-entity attention so each entity preserves its own identity.
+
 ## Install
 
 Python 3.10, CUDA 11.8 GPU. **Install Torch with matching CUDA libs first** — the default PyPI wheel ships an incompatible CUDA bundle that breaks at import on many systems:
@@ -188,11 +194,10 @@ The window indices are absolute *block-step* values: `step_index * 57 + block_of
 ## Citation
 
 ```bibtex
-@inproceedings{ventura2026deleaker,
-  title     = {DeLeaker: Dynamic Inference-Time Reweighting For Semantic Leakage Mitigation in Text-to-Image Models},
-  author    = {Ventura, Mor and Toker, Michael and Patashnik, Or and Belinkov, Yonatan and Reichart, Roi},
-  booktitle = {International Conference on Learning Representations (ICLR)},
-  year      = {2026},
-  url       = {https://arxiv.org/abs/2510.15015}
+@inproceedings{ventura2025deleaker,
+  title={Deleaker: Dynamic inference-time reweighting for semantic leakage mitigation in text-to-image models},
+  author={Ventura, Mor and Toker, Michael and Patashnik, Or and Belinkov, Yonatan and Reichart, Roi},
+  booktitle={The Fourteenth International Conference on Learning Representations},
+  year={2026}
 }
 ```
