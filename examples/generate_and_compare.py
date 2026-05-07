@@ -47,6 +47,26 @@ GUIDANCE_SCALE = 3.5
 # regenerated vanilla; in custom mode any resolution works.
 DEFAULT_HEIGHT = DEFAULT_WIDTH = 512
 
+# ---- DeleakerConfig defaults (edit here, or override on the CLI) ----
+USE_DELEAKER = True
+STD_MUL_TEXT = 1.0                 # threshold for image-text entity mask: mean + k*std
+STD_MUL_IMAGE_IMAGE = 1.0          # threshold for image-image cross-entity mask
+K_STRENGTH = 1.2                   # self-entity image-text boost
+START_AGGREGATING_FROM = 12        # block-step where rolling history begins
+STOP_AGGREGATING_AT = 12 * 57      # block-step where history stops
+START_INTERVENTION_FROM = 18       # block-step where attention editing begins
+STOP_INTERVENTION_AT = 20 * 57     # block-step where editing stops
+USE_HISTORY = True
+USE_BINARY_HISTORY = False
+HISTORY_SLIDING_WINDOW = 10
+DO_SMOOTHING = True                # morphological clean of entity masks
+# Ablation switches:
+DO_IMAGE_IMAGE = True
+DO_IMAGE_TEXT_STRENGTHENING = True
+DO_IMAGE_TEXT_WEAKENING = True
+DO_TEXT_TEXT_WEAKENING = False
+NUM_TEXT_TOKENS = 256
+
 
 def slug(prompt: str, max_words: int = 8) -> str:
     cleaned = re.sub(r"[^\w\s]", "", prompt.lower()).strip()
@@ -168,6 +188,35 @@ def parse_args() -> argparse.Namespace:
     p.add_argument("--width", type=int, default=DEFAULT_WIDTH,
                    help=f"Image width (default {DEFAULT_WIDTH}). HF mode "
                         f"requires 512 to match the reference images.")
+
+    # DeleakerConfig knobs (defaults pulled from the module-level constants
+    # so they show up in --help and can be tweaked in one place).
+    g = p.add_argument_group("deleaker config")
+    g.add_argument("--use-deleaker", action=argparse.BooleanOptionalAction,
+                   default=USE_DELEAKER, help="Master on/off for the intervention.")
+    g.add_argument("--std-mul-text", type=float, default=STD_MUL_TEXT)
+    g.add_argument("--std-mul-image-image", type=float, default=STD_MUL_IMAGE_IMAGE)
+    g.add_argument("--k-strength", type=float, default=K_STRENGTH)
+    g.add_argument("--start-aggregating-from", type=int, default=START_AGGREGATING_FROM)
+    g.add_argument("--stop-aggregating-at", type=int, default=STOP_AGGREGATING_AT)
+    g.add_argument("--start-intervention-from", type=int, default=START_INTERVENTION_FROM)
+    g.add_argument("--stop-intervention-at", type=int, default=STOP_INTERVENTION_AT)
+    g.add_argument("--use-history", action=argparse.BooleanOptionalAction,
+                   default=USE_HISTORY)
+    g.add_argument("--use-binary-history", action=argparse.BooleanOptionalAction,
+                   default=USE_BINARY_HISTORY)
+    g.add_argument("--history-sliding-window", type=int, default=HISTORY_SLIDING_WINDOW)
+    g.add_argument("--do-smoothing", action=argparse.BooleanOptionalAction,
+                   default=DO_SMOOTHING)
+    g.add_argument("--do-image-image", action=argparse.BooleanOptionalAction,
+                   default=DO_IMAGE_IMAGE)
+    g.add_argument("--do-image-text-strengthening", action=argparse.BooleanOptionalAction,
+                   default=DO_IMAGE_TEXT_STRENGTHENING)
+    g.add_argument("--do-image-text-weakening", action=argparse.BooleanOptionalAction,
+                   default=DO_IMAGE_TEXT_WEAKENING)
+    g.add_argument("--do-text-text-weakening", action=argparse.BooleanOptionalAction,
+                   default=DO_TEXT_TEXT_WEAKENING)
+    g.add_argument("--num-text-tokens", type=int, default=NUM_TEXT_TOKENS)
     return p.parse_args()
 
 
@@ -203,7 +252,25 @@ def main() -> None:
     out_root = Path(__file__).parent / "output" / out_subdir
     out_root.mkdir(parents=True, exist_ok=True)
 
-    cfg = DeleakerConfig()
+    cfg = DeleakerConfig(
+        use_deleaker=args.use_deleaker,
+        std_mul_text=args.std_mul_text,
+        std_mul_image_image=args.std_mul_image_image,
+        k_strength=args.k_strength,
+        start_aggregating_from=args.start_aggregating_from,
+        stop_aggregating_at=args.stop_aggregating_at,
+        start_intervention_from=args.start_intervention_from,
+        stop_intervention_at=args.stop_intervention_at,
+        use_history=args.use_history,
+        use_binary_history=args.use_binary_history,
+        history_sliding_window=args.history_sliding_window,
+        do_smoothing=args.do_smoothing,
+        do_image_image=args.do_image_image,
+        do_image_text_strengthening=args.do_image_text_strengthening,
+        do_image_text_weakening=args.do_image_text_weakening,
+        do_text_text_weakening=args.do_text_text_weakening,
+        num_text_tokens=args.num_text_tokens,
+    )
 
     counter = 0
     for k, item in enumerate(plan):
