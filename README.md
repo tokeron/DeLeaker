@@ -37,24 +37,19 @@ For the comparison-grid example that pulls prompts from `tokeron/slim-dataset`:
 pip install datasets
 ```
 
-Tested with Python 3.10, `torch==2.6` (cu118), `diffusers==0.32`, `transformers==4.49`. The pinned ranges in `requirements.txt` keep `transformers` below 5.0 and `diffusers` below 0.34 — both have introduced breaking changes to the Flux pipeline / attention processor API outside that window. VRAM use scales with resolution: ~16 GB at 512×512, ~24 GB at 1024×1024 with FLUX.1-dev in fp16.
-
-### Smoke test
-
-After install + login, verify the pipeline loads and generates:
-
-```bash
-python quickstart.py
-```
-
-This writes `out.png` (a single 512×512 image, ~1 min on a modern GPU after the model downloads on the first run).
-
 ## Quick start
 
 A self-contained one-prompt example lives at the repo root in two formats:
 
-- [`quickstart.py`](quickstart.py) — `python quickstart.py`
-- [`quickstart.ipynb`](quickstart.ipynb) — open in Jupyter / VS Code
+- [`quickstart.py`](quickstart.py) — runs out of the box with a default bat/owl prompt, or pass your own:
+  ```bash
+  python quickstart.py
+  python quickstart.py --prompt "A cow and a horse are sitting together in a bus." --entities "cow,horse"
+  python quickstart.py --prompt "..." --entities "x,y" --seed 42 --no-use-deleaker
+  ```
+- [`quickstart.ipynb`](quickstart.ipynb) — same thing in a Jupyter notebook.
+
+Each entity in `--entities` must appear verbatim in `--prompt`. Output is written to `out.png`.
 
 Or do it inline:
 
