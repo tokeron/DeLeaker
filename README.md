@@ -41,7 +41,46 @@ The `entities` you pass must appear verbatim in the prompt. Pass a `DeleakerConf
 | --- | --- |
 | [`examples/vanilla_inference.py`](examples/vanilla_inference.py) | Plain FLUX.1-dev, no deleaker (baseline) |
 | [`examples/deleaker_inference.py`](examples/deleaker_inference.py) | Same prompt + seed with deleaker on |
-| [`examples/run_from_hf_dataset.py`](examples/run_from_hf_dataset.py) | Pull a known-leaky row from `tokeron/slim-dataset` and re-run with deleaker |
+| [`examples/generate_and_compare.py`](examples/generate_and_compare.py) | Generate vanilla **and** deleaker side-by-side, build comparison grids. Two modes — see below. |
+
+### `generate_and_compare.py` — dataset mode vs custom mode
+
+**Dataset mode (default).** Use prompts that the published `tokeron/slim-dataset` already labelled as leaking on FLUX.1-dev. The script pulls every seed listed for each selected prompt and produces a 2-panel grid per (prompt, seed): `vanilla | deleaker`. The HF reference image is still saved alongside (`seed_XXXX_reference.png`) for spot-checks.
+
+```bash
+# Run on the default selection of dataset prompts (indices 2, 3, 4):
+python examples/generate_and_compare.py
+
+# Pick your own prompt indices (0-based, in order of first appearance):
+python examples/generate_and_compare.py --hf-indices 5,6,8
+```
+
+Resolution is **fixed at 512×512** in dataset mode because the references on the Hub were generated at that resolution; running at a different size would produce wholly different compositions for the same seed.
+
+**Custom mode.** Provide your own prompt and entities. The script generates vanilla + deleaker for each seed and produces the same 2-panel `vanilla | deleaker` grid.
+
+```bash
+python examples/generate_and_compare.py \
+    --prompt "A bat and an owl are perched side by side on a tree branch." \
+    --entities "bat,owl" \
+    --seeds 100,200,300 \
+    --height 1024 --width 1024
+```
+
+Each entity passed via `--entities` must appear verbatim in the prompt. Default seeds are `100,200,300`; default resolution is 512×512.
+
+**Output layout** (both modes):
+```
+examples/output/<subdir>/
+    <prompt_idx>_<prompt_slug>/
+        prompt.txt
+        seed_0100_vanilla.png
+        seed_0100_deleaker.png
+        seed_0100_compare.png    # 2-panel pair grid (vanilla | deleaker)
+        ...
+        grid.png                 # master grid: rows = seeds
+```
+`<subdir>` defaults to `hf_dataset` in dataset mode and `custom` in custom mode; override with `--out-subdir`.
 
 ## Dataset
 

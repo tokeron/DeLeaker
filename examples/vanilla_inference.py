@@ -11,8 +11,8 @@ import torch
 from diffusers import FluxPipeline
 
 
-PROMPT = "A cat and a cheetah are splashing each other with water in a shallow river."
-SEED = 300
+PROMPT = "A bat is sitting on a branch while an owl is flying above through the moonlit forest."
+SEED = 200
 NUM_INFERENCE_STEPS = 20
 GUIDANCE_SCALE = 3.5
 HEIGHT = WIDTH = 1024

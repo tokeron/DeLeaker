@@ -38,13 +38,14 @@ from deleaker import DeleakerFluxPipeline, DeleakerConfig
 
 
 HF_DATASET = "tokeron/slim-dataset"
-DEFAULT_HF_INDICES = [2, 3, 4]
+DEFAULT_HF_INDICES = [1, 3, 4]
 DEFAULT_CUSTOM_SEEDS = [100, 200, 300]
 NUM_INFERENCE_STEPS = 20
 GUIDANCE_SCALE = 3.5
-# The dataset's reference images were generated at 512x512 — same-seed runs
-# at any other resolution would produce wholly different compositions.
-HEIGHT = WIDTH = 512
+# The HF dataset's reference images were generated at 512x512. In HF mode the
+# resolution must stay at 512 for the reference panel to match the locally
+# regenerated vanilla; in custom mode any resolution works.
+DEFAULT_HEIGHT = DEFAULT_WIDTH = 512
 
 
 def slug(prompt: str, max_words: int = 8) -> str:
@@ -101,20 +102,12 @@ def label(img: Image.Image, text: str, height: int = 32) -> Image.Image:
     return out
 
 
-def build_pair_grid(vanilla: Image.Image, deleaker: Image.Image, seed: int,
-                    reference: Image.Image = None) -> Image.Image:
-    panels = []
-    if reference is not None:
-        panels.append(label(reference, f"reference (HF) | seed {seed}"))
-    panels.append(label(vanilla, f"vanilla | seed {seed}"))
-    panels.append(label(deleaker, f"deleaker | seed {seed}"))
-    w = sum(p.width for p in panels)
-    h = max(p.height for p in panels)
-    grid = Image.new("RGB", (w, h), "white")
-    x = 0
-    for p in panels:
-        grid.paste(p, (x, 0))
-        x += p.width
+def build_pair_grid(vanilla: Image.Image, deleaker: Image.Image, seed: int) -> Image.Image:
+    a = label(vanilla, f"vanilla | seed {seed}")
+    b = label(deleaker, f"deleaker | seed {seed}")
+    grid = Image.new("RGB", (a.width + b.width, max(a.height, b.height)), "white")
+    grid.paste(a, (0, 0))
+    grid.paste(b, (a.width, 0))
     return grid
 
 
@@ -169,6 +162,12 @@ def parse_args() -> argparse.Namespace:
     p.add_argument("--out-subdir", default=None,
                    help="Subdir of examples/output/ to write to. Defaults to "
                         "'hf_dataset' in HF mode, 'custom' in custom mode.")
+    p.add_argument("--height", type=int, default=DEFAULT_HEIGHT,
+                   help=f"Image height (default {DEFAULT_HEIGHT}). HF mode "
+                        f"requires 512 to match the reference images.")
+    p.add_argument("--width", type=int, default=DEFAULT_WIDTH,
+                   help=f"Image width (default {DEFAULT_WIDTH}). HF mode "
+                        f"requires 512 to match the reference images.")
     return p.parse_args()
 
 
@@ -233,7 +232,7 @@ def main() -> None:
                 use_deleaker=False,
                 num_inference_steps=NUM_INFERENCE_STEPS,
                 guidance_scale=GUIDANCE_SCALE,
-                height=HEIGHT, width=WIDTH,
+                height=args.height, width=args.width,
                 generator=g,
                 max_sequence_length=256,
             ).images[0]
@@ -245,7 +244,7 @@ def main() -> None:
                 deleaker_config=cfg,
                 num_inference_steps=NUM_INFERENCE_STEPS,
                 guidance_scale=GUIDANCE_SCALE,
-                height=HEIGHT, width=WIDTH,
+                height=args.height, width=args.width,
                 generator=g,
                 max_sequence_length=256,
             ).images[0]
@@ -255,7 +254,7 @@ def main() -> None:
             img_vanilla.save(prompt_dir / f"seed_{seed:04d}_vanilla.png")
             img_deleaker.save(prompt_dir / f"seed_{seed:04d}_deleaker.png")
 
-            pair = build_pair_grid(img_vanilla, img_deleaker, seed, reference=ref_image)
+            pair = build_pair_grid(img_vanilla, img_deleaker, seed)
             pair.save(prompt_dir / f"seed_{seed:04d}_compare.png")
             pair_grids.append(pair)
 

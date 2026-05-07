@@ -11,9 +11,9 @@ import torch
 from deleaker import DeleakerFluxPipeline, DeleakerConfig
 
 
-PROMPT = "A cat and a cheetah are splashing each other with water in a shallow river."
-ENTITIES = ["cat", "cheetah"]
-SEED = 300
+PROMPT = "A bat is sitting on a branch while an owl is flying above through the moonlit forest."
+ENTITIES = ["bat", "owl"]
+SEED = 200
 NUM_INFERENCE_STEPS = 20
 GUIDANCE_SCALE = 3.5
 HEIGHT = WIDTH = 1024
